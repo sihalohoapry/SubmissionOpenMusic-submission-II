@@ -49,16 +49,15 @@ class AuthenticationsHandler {
   }
 
   async putAuthenticationHandler(request, h) {
-    console.error('babi');
     try {
       this._validator.validatePutAuthenticationPayload(request.payload);
       const { refreshToken } = request.payload;
       console.error(`ini token ${refreshToken}`);
       await this._authenticationsService.verifyRefreshToken(refreshToken);
       console.error('berhasil authenticationsService.verifyRefreshToken');
-      const { id } = this._tokenManager.verifyRefreshToken(refreshToken);
+      const { id } = await this._tokenManager.verifyRefreshToken(refreshToken);
       console.error('berhasil tokenManager.verifyRefreshToken');
-      const accessToken = this._tokenManager.generateAccessToken({ id });
+      const accessToken = await this._tokenManager.generateAccessToken({ id });
       return {
         status: 'success',
         message: 'Aaccess token berhasil diperbarui',
