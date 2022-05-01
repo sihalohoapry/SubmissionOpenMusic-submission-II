@@ -15,10 +15,10 @@ class CollaborationsHandler {
       this._validator.validateCollaborationPayload(request.payload);
       const { id: owner } = request.auth.credentials;
       const { playlistId, userId } = request.payload;
-
+      await this._collaborationsService.verifyUser(userId);
       await this._playlistsService.verifyPlaylistOwner(playlistId, owner);
-      const collaborationId = await this._collaborationsService
-        .addCollaboration(playlistId, userId);
+      // eslint-disable-next-line max-len
+      const collaborationId = await this._collaborationsService.addCollaboration(playlistId, userId);
       const res = h.response({
         status: 'success',
         data: {

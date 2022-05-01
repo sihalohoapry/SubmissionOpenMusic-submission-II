@@ -84,10 +84,10 @@ class PlaylistsHandler {
 
   async deletePlaylistHandler(request, h) {
     try {
-      const { playlistId, userId } = request.params;
+      const { playlistId } = request.params;
       const { id: owner } = request.auth.credentials;
       await this._service.verifyPlaylistOwner(playlistId, owner);
-      await this._service.deletePlaylist(playlistId, userId);
+      await this._service.deletePlaylist(playlistId);
 
       return {
         status: 'success',
@@ -107,6 +107,7 @@ class PlaylistsHandler {
         message: 'Maaf, terjadi kesalahan dalam server kami',
       });
       res.code(500);
+      console.log(error);
       return res;
     }
   }
@@ -118,6 +119,7 @@ class PlaylistsHandler {
       const { playlistId } = request.params;
       const { id: owner } = request.auth.credentials;
       await this._service.verifyPlaylistAccess(playlistId, owner);
+      await this._service.checkSongAvaible(songId);
       await this._service.checkSongOnList(playlistId, songId);
       const song = await this._service.postSongsToPlaylist(playlistId, songId);
       this._service.addActivities(playlistId, songId, owner, 'add');
@@ -170,7 +172,7 @@ class PlaylistsHandler {
           },
         },
       });
-      res.code(201);
+      res.code(200);
       return res;
     } catch (error) {
       if (error instanceof ClientError) {
@@ -197,7 +199,7 @@ class PlaylistsHandler {
       const { playlistId } = request.params;
       const { id: credentialId } = request.auth.credentials;
       await this._service.verifyPlaylistAccess(playlistId, credentialId);
-      await this._service.deleteSongFromList(songId);
+      await this._service.deleteSongFromList(playlistId, songId);
       this._service.addActivities(playlistId, songId, credentialId, 'delete');
       return {
         status: 'success',
@@ -223,20 +225,21 @@ class PlaylistsHandler {
 
   async getActivitiesHandler(request, h) {
     try {
-      const { id } = request.params;
+      const { playlistId } = request.params;
+      console.log(playlistId);
       const { id: credentialId } = request.auth.credentials;
-      await this._service.verifyPlaylistAccess(id, credentialId);
-      const result = await this._service.getActivites(id);
+      await this._service.verifyPlaylistAccess(playlistId, credentialId);
+      const result = await this._service.getActivites(playlistId);
       const res = h.response({
         status: 'success',
         data: {
-          playlistId: id,
+          playlistId,
           activities: {
             result,
           },
         },
       });
-      res.code(201);
+      res.code(200);
       return res;
     } catch (error) {
       if (error instanceof ClientError) {
