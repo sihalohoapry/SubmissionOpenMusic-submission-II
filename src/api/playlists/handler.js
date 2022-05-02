@@ -146,6 +146,7 @@ class PlaylistsHandler {
         message: 'Maaf terjadi masalah pada server kami',
       });
       res.code(500);
+      console.error(error);
       return res;
     }
   }
@@ -226,17 +227,19 @@ class PlaylistsHandler {
   async getActivitiesHandler(request, h) {
     try {
       const { playlistId } = request.params;
-      console.log(playlistId);
-      const { id: credentialId } = request.auth.credentials;
-      await this._service.verifyPlaylistAccess(playlistId, credentialId);
+      const { id: userId } = request.auth.credentials;
+      await this._service.verifyPlaylistAccess(playlistId, userId);
       const result = await this._service.getActivites(playlistId);
       const res = h.response({
         status: 'success',
         data: {
           playlistId,
-          activities: {
-            result,
-          },
+          activities: result.map((list) => ({
+            username: list.username,
+            title: list.title,
+            action: list.action,
+            time: list.time,
+          })),
         },
       });
       res.code(200);

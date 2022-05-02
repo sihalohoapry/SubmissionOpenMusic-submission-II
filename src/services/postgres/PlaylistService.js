@@ -25,14 +25,11 @@ class PlaylistService {
 
   async getPlaylist(owner) {
     const query = {
-      text: 'SELECT * FROM playlists INNER JOIN users ON users.id = playlists.owner  WHERE owner = $1',
+      text: 'SELECT * FROM playlists INNER JOIN users ON playlists.owner = users.id WHERE owner = $1',
       // text: 'SELECT * FROM playlists WHERE owner = $1',
       values: [owner],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
-      throw new NotFoundError('Anda tidak memiliki playlist');
-    }
     return result.rows;
   }
 
@@ -163,13 +160,13 @@ class PlaylistService {
 
   async getActivites(playlistId) {
     const query = {
-      text: 'SELECT * FROM playlist_song_activities WHERE playlist_id = $1',
+      text: 'SELECT * FROM playlist_song_activities INNER JOIN users ON playlist_song_activities.user_id = users.id INNER JOIN songs ON playlist_song_activities.song_id = songs.id WHERE playlist_id = $1',
       values: [playlistId],
     };
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
-      throw new NotFoundError('tidak ada aktifitas');
-    }
+    // if (!result.rows.length) {
+    //   throw new NotFoundError('tidak ada aktifitas');
+    // }
     return result.rows;
   }
 }
